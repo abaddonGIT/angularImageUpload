@@ -52,38 +52,59 @@
 
         }, false);
     };
+    //Кроссбраузерное создание запроса
+    miniUplode.prototype.getXmlHttp = function() {
+        var xhr;
+        try {
+            xhr = new ActiveXObject("Msxml2.XMLHTTP");
+        } catch (e) {
+            try {
+                xhr = new ActiveXObject("Microsoft.XMLHTTP");
+            } catch (E) {
+                xhr = false;
+            }
+        }
+        if (!xhr && typeof XMLHttpRequest != 'undefined') {
+            xhr = new XMLHttpRequest();
+        }
+        return xhr;
+    }
 
     miniUplode.prototype.uplode = function(file) {
-        var form = new FormData(), def = this.def;
-        form.append('path', '/');
-        form.append('file[]', file);
+        var xhr = getXmlHttp();
 
-        $.ajax({
-            xhr: function() {
-                var xhr = new window.XMLHttpRequest();
-                // Upload progress
-                xhr.upload.addEventListener('progress', function(e) {
-                    if (e.lengthComputable) {
-                        def.progress(e.loaded, e.total);
-                    }
-                }, false);
-                return xhr;
-            },
-            type: 'POST',
-            url: def.uploadURL,
-            data: form,
-            cache: false,
-            contentType: false,
-            processData: false,
-            success: function(data) {
-                console.log(data);
-                //self.options.afterUpload(data);
-            },
-            dataType: def.dataType,
-            error: function(jqXHR, textStatus, errorThrown) {
-                //self.options.error(jqXHR, textStatus, errorThrown);
-            }
-        })
+        xhr
+//        var form = new FormData(), def = this.def;
+//        form.append('path', '/');
+//        form.append('file[]', file);
+//
+//        $.ajax({
+//            xhr: function() {
+//                var xhr = new window.XMLHttpRequest();
+//                // Upload progress
+//                xhr.upload.addEventListener('progress', function(e) {
+//                    console.log(e.total);
+//                    if (e.lengthComputable) {
+//                        def.progress(e.loaded, e.total);
+//                    }
+//                }, false);
+//                return xhr;
+//            },
+//            type: 'POST',
+//            url: def.uploadURL,
+//            data: form,
+//            cache: false,
+//            contentType: false,
+//            processData: false,
+//            success: function(data) {
+//                console.log(data);
+//                //self.options.afterUpload(data);
+//            },
+//            dataType: def.dataType,
+//            error: function(jqXHR, textStatus, errorThrown) {
+//                //self.options.error(jqXHR, textStatus, errorThrown);
+//            }
+//        })
     };
 
     miniUplode.prototype.normalInit = function() {
@@ -94,8 +115,8 @@
         var def = {
             'beforeFileUplode': function(file) {
             },
-            'progress': function () {
-        
+            'progress': function() {
+
             },
             'fileType': 'image/png,image/jpeg,image/gif',
             'uploadURL': 'upload.php',
