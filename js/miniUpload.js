@@ -73,7 +73,7 @@
     miniUplode.prototype.uplode = function(file) {
         var xhr = getXmlHttp();
 
-        xhr
+        //xhr
 //        var form = new FormData(), def = this.def;
 //        form.append('path', '/');
 //        form.append('file[]', file);
