@@ -1,0 +1,30 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>UploadiFive Test</title>
+<script src="js/jquery-2.0.0.min.js" type="text/javascript"></script>
+<script src="js/miniUpload.js" type="text/javascript"></script>
+<link rel="stylesheet" type="text/css" href="uploadify/uploadify.css">
+<style type="text/css">
+body {
+	font: 13px Arial, Helvetica, Sans-serif;
+}
+</style>
+</head>
+
+<body>
+	<h1>Upload DEMO</h1>
+	<form>
+		<div id="queue"></div>
+		<input id="file_upload" name="file_upload" type="file" multiple="true">
+	</form>
+	<script type="text/javascript">
+		$(function() {
+			$('#file_upload').miniUpload({
+
+			});
+		});
+	</script>
+</body>
+</html>
