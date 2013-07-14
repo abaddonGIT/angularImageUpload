@@ -46,7 +46,24 @@
             'cursor': 'poiter'
         }
         ).append(def.buttonTitle);
-    }
+    };
+    //Кроссбраузерное создание запроса
+    miniUplode.prototype.getXmlHttp = function() {
+        var xhr;
+        try {
+            xhr = new ActiveXObject("Msxml2.XMLHTTP");
+        } catch (e) {
+            try {
+                xhr = new ActiveXObject("Microsoft.XMLHTTP");
+            } catch (E) {
+                xhr = false;
+            }
+        }
+        if (!xhr && typeof XMLHttpRequest !== 'undefined') {
+            xhr = new XMLHttpRequest();
+        }
+        return xhr;
+    };
     //Загрузка файлов при помощи HTML5 API
     miniUplode.prototype.html5Init = function() {
         var def = this.def, up = this, parent;
@@ -54,7 +71,7 @@
         //Вешаем обработчик на изменение в поле выбора фоток
         this.el.addEventListener('change', function() {
             var fCount = this.files.length, queue = 0, i = 0, j = 0, //кол-во выбранных файлов
-            acceptFiles = def.fileType.split(',');
+                    acceptFiles = def.fileType.split(',');
 
             //Строим очередь куда попадут файлы только с нужным типом
             for (; i < fCount; i++) {
@@ -76,23 +93,6 @@
             }
 
         }, false);
-    };
-    //Кроссбраузерное создание запроса
-    miniUplode.prototype.getXmlHttp = function() {
-        var xhr;
-        try {
-            xhr = new ActiveXObject("Msxml2.XMLHTTP");
-        } catch (e) {
-            try {
-                xhr = new ActiveXObject("Microsoft.XMLHTTP");
-            } catch (E) {
-                xhr = false;
-            }
-        }
-        if (!xhr && typeof XMLHttpRequest !== 'undefined') {
-            xhr = new XMLHttpRequest();
-        }
-        return xhr;
     };
     //Загрузка файла на сервер
     miniUplode.prototype.uplode = function(file) {
