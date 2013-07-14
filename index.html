@@ -9,14 +9,18 @@
 body {
 	font: 13px Arial, Helvetica, Sans-serif;
 }
+#fileUplode {
+    border: 1px solid #ccc;
+    border-radius: 10px;
+}
 </style>
 </head>
 
 <body>
 	<h1>Upload DEMO</h1>
 	<form>
-		<div id="queue"></div>
 		<input id="file_upload" name="file_upload" type="file" multiple="true">
+                <div id="progress"></div>
 	</form>
 	<script type="text/javascript">
 		$(function() {
