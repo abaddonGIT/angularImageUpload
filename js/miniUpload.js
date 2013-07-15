@@ -115,8 +115,11 @@
             }
 
             if (i < ln) {
-                var form = new FormData();
+                var form = new FormData(), o = 0;
                 form.append('file', files[i]);
+                for (o in config.formData) {
+                    form.append(o, config.formData[o]);
+                }
 
                 $.ajax({
                     url: config.uploadURL,
@@ -125,7 +128,7 @@
                         var myXhr = $.ajaxSettings.xhr();
                         if (myXhr.upload) { // проверка что осуществляется upload
                             myXhr.upload.addEventListener('progress', function(e) {
-                                var e = e || e.window
+                                var e = e || e.window;
                                 progressHandlingFunction(e, files[i]);
                             }, false); //передача в функцию значений
                         }
@@ -190,6 +193,7 @@
             },
             'fileType': 'image/png,image/jpeg,image/gif',
             'uploadURL': 'upload.php',
+            'formData': {'test':1},
             'dataType': 'html',
             'buttonTitle': 'Загрузить файлы',
             'width': 200,
