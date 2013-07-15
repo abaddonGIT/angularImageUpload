@@ -1,2 +1,2 @@
 <?php
-return 'asd';
+print_r($_FILES);
