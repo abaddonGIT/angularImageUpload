@@ -4,12 +4,12 @@
  * @version 1.0.0
  * ***************************************************/
 /*global window, $, jQuery, document */
-(function($) {
+(function ($) {
     "use strict";
     var totalBytesUploaded, totalBytes, queue, config, point, fileQueue;
     //Если такое свойство не определено то добавляем его
     if (Array.in_array === undefined) {
-        Array.prototype.in_array = function(str) {
+        Array.prototype.in_array = function (str) {
             var _arrayLenght = this.length,
                     i;
 
@@ -22,7 +22,7 @@
         };
     }
 
-    function miniUplode(el, def) {
+    function miniUplode (el, def) {
         point = el;
         config = def;
         //Проверка на поддержку API
@@ -35,7 +35,7 @@
     }
     ;
     //Скрываем поле input и рисуем кнопку
-    miniUplode.prototype.buildUI = function() {
+    miniUplode.prototype.buildUI = function () {
         $(point).prop('accept', config.fileType).css({
             'position': 'absolute',
             'z-index': 2,
@@ -63,7 +63,7 @@
 
     };
     //Загрузка файлов при помощи HTML5 API
-    miniUplode.prototype.html5Init = function() {
+    miniUplode.prototype.html5Init = function () {
         var up = this, parent;
         this.buildUI();
         //Вешаем обработчик на изменение в поле выбора фоток
@@ -86,7 +86,7 @@
         }, false);
     };
 
-    function progressHandlingFunction(e, file) {
+    function progressHandlingFunction (e, file) {
 
         if (e.lengthComputable) {
             var lapsedBytes = 0;
@@ -103,7 +103,7 @@
     }
 
     //Загрузка файла на сервер
-    function uplode(files) {
+    function uplode (files) {
         var ln = files.length;
 
         //console.log(ln);
@@ -124,8 +124,9 @@
                     xhr: function() {
                         var myXhr = $.ajaxSettings.xhr();
                         if (myXhr.upload) { // проверка что осуществляется upload
-                            myXhr.upload.addEventListener('progress', function() {
-                                progressHandlingFunction(event, files[i]);
+                            myXhr.upload.addEventListener('progress', function(e) {
+                                var e = e || e.window
+                                progressHandlingFunction(e, files[i]);
                             }, false); //передача в функцию значений
                         }
                         myXhr.onreadystatechange = function() {
@@ -162,30 +163,29 @@
         };
         //console.log(ln);
         _uplode(files, ln);
-    }
-    ;
+    };
 
-    miniUplode.prototype.normalInit = function() {
+    miniUplode.prototype.normalInit = function () {
         this.buildUI();
         console.log('normal');
     };
 
     $.fn.miniUpload = function(options) {
         var def = {
-            'beforeFileUplode': function(file) {
+            'beforeFileUplode': function (file) {
 
             },
-            'fileUploded': function(file, data) {
+            'fileUploded': function (file, data) {
 
             },
-            'uploadProgress': function(totalBytesUploaded, totalBytes) {
+            'uploadProgress': function (totalBytesUploaded, totalBytes) {
                 //console.log(lapsedBytes);
                 var progress = ((totalBytesUploaded / totalBytes) * 100) + '%';
                 $(def.progressIdBlock).animate({
                     'width': progress
                 }, 50);
             },
-            'allFilesUploded': function(files, ln) {
+            'allFilesUploded': function (files, ln) {
 
             },
             'fileType': 'image/png,image/jpeg,image/gif',
