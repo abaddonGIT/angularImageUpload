@@ -1,4 +1,5 @@
-miniUpload
+angularImageUpload
 ==========
 
-Загрузка файлов на сервер
+Загрузка картинок на angularjs.
+Поддерживаемые методы загрузки: HTML5, iFrame, SWFuplode.
