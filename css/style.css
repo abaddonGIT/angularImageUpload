@@ -1,0 +1,107 @@
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  -ms-user-select: none;
+  -moz-user-select: none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
+}
+
+#wrapper {
+    width: 960px;
+    margin: 0 auto;
+    padding: 20px 0;
+}
+
+.uplode_list {
+    border-radius: 10px;
+    padding: 10px;
+    border: 2px solid #ccc;
+    margin: 20px 0;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+table td {
+    border: 2px dashed #cccccc;
+}
+
+td {
+    width: 20%;
+    text-align: center;
+    vertical-align: middle;
+    padding: 10px;
+}
+
+.thumbs {
+    margin: 0 auto;
+}
+
+#all {
+    float: right;
+    border: 2px solid #ccc;
+    border-radius: 50%;
+    padding: 5px 12px;
+}
+
+/*Прогресс бар*/
+.progress-bar {
+    height: 25px;
+    border: 1px solid #ccc;
+    background-color: #ccc;
+    padding: 5px;
+    border-radius: 5px;
+}
+
+.progress-bar span {
+    width: 0;
+    height: 100%;
+    border-radius: 5px;
+    display: block;
+    -webkit-transition: width 2.7s;
+    -moz-transition: width 2.7s;
+    transition: width 2.7s;
+    background-color: #3CB371;
+    box-shadow: 0 1px 0 rgba(255, 255, 255, .5) inset;
+    -webkit-background-size: 30px 30px;
+    -moz-background-size: 30px 30px;
+    background-size: 30px 30px;
+    background-image: -webkit-gradient(linear, left top, right bottom,
+    color-stop(.25, rgba(255, 255, 255, .15)), color-stop(.25, transparent),
+    color-stop(.5, transparent), color-stop(.5, rgba(255, 255, 255, .15)),
+    color-stop(.75, rgba(255, 255, 255, .15)), color-stop(.75, transparent),
+    to(transparent));
+    background-image: -webkit-linear-gradient(135deg, rgba(255, 255, 255, .15) 25%, transparent 25%,
+    transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%,
+    transparent 75%, transparent);
+    background-image: -moz-linear-gradient(135deg, rgba(255, 255, 255, .15) 25%, transparent 25%,
+    transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%,
+    transparent 75%, transparent);
+    background-image: -ms-linear-gradient(135deg, rgba(255, 255, 255, .15) 25%, transparent 25%,
+    transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%,
+    transparent 75%, transparent);
+    background-image: -o-linear-gradient(135deg, rgba(255, 255, 255, .15) 25%, transparent 25%,
+    transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%,
+    transparent 75%, transparent);
+    background-image: linear-gradient(135deg, rgba(255, 255, 255, .15) 25%, transparent 25%,
+    transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%,
+    transparent 75%, transparent);
+
+    -webkit-animation: animate-stripes 3s linear infinite;
+    -moz-animation: animate-stripes 3s linear infinite;
+}
+
+@-webkit-keyframes animate-stripes {
+    0% {background-position: 0 0;} 100% {background-position: 60px 0;}
+}
+
+
+@-moz-keyframes animate-stripes {
+    0% {background-position: 0 0;} 100% {background-position: 60px 0;}
+}

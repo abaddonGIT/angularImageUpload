@@ -1,5 +1,4 @@
-angularImageUpload
-==========
+angularFileUploder
+==================
 
-Загрузка картинок на angularjs.
-Поддерживаемые методы загрузки: HTML5, iFrame, SWFuplode.
+Загрузка файлов на angularjs
