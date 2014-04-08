@@ -10,7 +10,6 @@ app.controller("uploadeController", function ($scope, $imageUploade) {
             button_placeholder_id : "uploadButton",
             file_size_limit : "2 MB",
             file_types_description : "Images",
-            file_upload_limit : "0",
             button_width : 100,
             button_height : 30,
             button_text_left_padding: 15,

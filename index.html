@@ -12,6 +12,12 @@
 
 <div id="wrapper">
     <div class="uplodes">
+        <div data-drop-zone id="dropZone" ng-show="uploader.isHtml5">
+            <div ng-repeat="item in uploader.queue" class="dropPreview" data-drag-sort>
+                <div ng-show="uploader.isHtml5" data-image-thumb="item.file" class="thumbs" data-width="100"></div>
+                {{item.file.name}}
+            </div>
+        </div>
         <input type="file" data-uploade-source="flash"/>
         <div id="all">{{uploader.allUploded}}</div>
 
@@ -36,6 +42,9 @@
                     </td>
                 </tr>
             </table>
+        </div>
+        <div ng-repeat="error in uploader.errors track by $index">
+            {{error}}
         </div>
         <div ng-repeat="item in uploader.errorQueue">
             {{item.file.name}} - {{item.error}}

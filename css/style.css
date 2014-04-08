@@ -43,6 +43,27 @@ td {
     margin: 0 auto;
 }
 
+#dropZone {
+    padding: 10px;
+    margin: 10px 0;
+    border: 2px solid #ccc;
+    min-height: 150px;
+    border-radius: 10px;
+}
+
+#dropZone.active {
+    border-color: #3CB371;
+}
+
+.dropPreview {
+    display: inline-block;
+    vertical-align: top;
+    margin: 10px;
+    text-align: center;
+    border: 2px dashed #ccc;
+    padding: 3px;
+}
+
 #all {
     float: right;
     border: 2px solid #ccc;

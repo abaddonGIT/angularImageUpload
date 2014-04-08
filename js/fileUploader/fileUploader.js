@@ -9,8 +9,9 @@ var upLoader = angular.module("imageUploade", []);
 //Поддердка HTML5
 upLoader.constant('html5', !!(window.File && window.FormData));
 upLoader.value('errors', {
-    fileType: "Не подходящий формат файла!",
-    xhr: "При загрузке файла произошла ошибка"
+    100: "Не подходящий формат файла!",
+    110: "При загрузке файла произошла ошибка!",
+    120: "Привышен лимит на загрузку фалов!"
 });
 
 //Директива для элемента кагрузки
@@ -50,11 +51,15 @@ upLoader.factory('$imageUploade', ['html5', '$rootScope', 'errors', '$compile', 
         angular.extend(this, {
             isHtml5: html5,
             scope: $rootScope,
+            multiple: true,
             acceptTypes: [],
+            file_upload_limit: 0,
             errorQueue: [],
             swfUploadOptions: {},
             allUploded: 0,
-            queue: []
+            queue: [],
+            errors: []
+
         }, options);
 
         //Событие на добавление файлов
@@ -65,7 +70,19 @@ upLoader.factory('$imageUploade', ['html5', '$rootScope', 'errors', '$compile', 
             } else {
                 data.transport = "html5";
             }
-            this.addFilesToQueue(data);
+
+            var uplodeQueue = data.length ? data : [data];
+
+            if (this.file_upload_limit === 0) {
+                this.addFilesToQueue(data);
+            } else {
+                if (this.queue.length < this.file_upload_limit && uplodeQueue.length <= this.file_upload_limit && data.length !== 0) {
+                    this.addFilesToQueue(data);
+                } else {
+                    this.errors.push(errors[120]);
+                    this.updateScope();
+                }
+            }
         }.bind(this));
 
         //Иницыализация flash-загрузчика
@@ -97,10 +114,10 @@ upLoader.factory('$imageUploade', ['html5', '$rootScope', 'errors', '$compile', 
                 }
                 i++;
             } while (i < ln);
-            //Обновляем наш скоп
-            this.updateScope();
             //Подгружаем выбранные файлы
             this.loadedAll();
+            //Обновляем наш скоп
+            this.updateScope();
         },
         updateScope: function () {
             this.scope.$$phase || this.scope.$digest();
@@ -148,7 +165,7 @@ upLoader.factory('$imageUploade', ['html5', '$rootScope', 'errors', '$compile', 
             //Добавляем дополнительные параметры к запросу
             if (this.post_params) {
                 angular.forEach(this.post_params, function (i, j) {
-                   form.append(j, i);
+                    form.append(j, i);
                 });
             }
 
@@ -169,7 +186,7 @@ upLoader.factory('$imageUploade', ['html5', '$rootScope', 'errors', '$compile', 
                 //тут надо описать обрыв загрузки картинки
             };
             xhr.onerror = function () {
-                item.error = errors['xhr'];
+                item.error = errors[110];
                 that.errorQueue.push(item);
             };
             xhr.open('POST', this.url, true);
@@ -212,16 +229,20 @@ upLoader.factory('$imageUploade', ['html5', '$rootScope', 'errors', '$compile', 
             });
         },
         /*
-        * Загрузка через SWFuplode
+         * Загрузка через SWFuplode
          */
         SWFinit: function (elem) {
             var that = this;
             //Добавляем элемент в который будет помещена кнопка
             if (SWFUpload) {
                 var but_id = this.swfUploadOptions.button_placeholder_id || "flash";
-                this.swfUploadOptions.upload_url = this.url;//куда отправлять
-                //Дополнительные данные
-                this.swfUploadOptions.post_params = this.post_params;
+
+                angular.extend(this.swfUploadOptions, {
+                    file_upload_limit: this.file_upload_limit,
+                    upload_url: this.url,
+                    post_params: this.post_params
+                });
+
                 //Разрешенные типы файлов
                 var accept = angular.extend([], that.acceptTypes), ln = accept.length;
                 while (ln--) {
@@ -238,8 +259,19 @@ upLoader.factory('$imageUploade', ['html5', '$rootScope', 'errors', '$compile', 
                 //Загрузка файла завершена
                 this.swfUploadOptions.upload_success_handler = function (file, serverData) {
                     angular.forEach(that.queue, function (item) {
-                        if(item.file.flash.index === file.index) {
+                        if (item.file.flash.index === file.index) {
+                            console.log(serverData);
                             item.afterUploade(serverData);
+                        }
+                    });
+                };
+                //Ошибки
+                this.swfUploadOptions.file_queue_error_handler = function (file, code, message) {
+                    that.scope.$apply(function () {
+                        switch (code) {
+                            case -100:
+                                that.errors.push(errors[120]);
+                                break;
                         }
                     });
                 };
@@ -253,7 +285,7 @@ upLoader.factory('$imageUploade', ['html5', '$rootScope', 'errors', '$compile', 
         }
     };
 
-    //Объект Картинки
+//Объект Картинки
     var Item = function (item, options, type) {
         switch (type) {
             case "iframe"://подправляем объект изображения
@@ -271,6 +303,7 @@ upLoader.factory('$imageUploade', ['html5', '$rootScope', 'errors', '$compile', 
                 options.transport = 'iframe';
                 break;
             case "flash":
+                console.dir(item);
                 options.file = {
                     lastModifiedDate: item.modificationdate,
                     name: item.name,
@@ -284,7 +317,7 @@ upLoader.factory('$imageUploade', ['html5', '$rootScope', 'errors', '$compile', 
         //проверка на тип файла
         var type = options.file.type.slice(options.file.type.lastIndexOf('/') + 1);
         if (options.uplode.acceptTypes.indexOf(type) === -1 || !type) {
-            options.error = errors.fileType;
+            options.error = errors[100];
         }
         angular.extend(this, {
             transport: 'html5',
@@ -293,7 +326,6 @@ upLoader.factory('$imageUploade', ['html5', '$rootScope', 'errors', '$compile', 
             mbSize: (options.file.size / (1000 * 1024)).toFixed(2),
             progress: 0
         }, options);
-
 
 
         return this;
@@ -319,4 +351,5 @@ upLoader.factory('$imageUploade', ['html5', '$rootScope', 'errors', '$compile', 
             return Loader(options);
         }
     }
-}]);
+}])
+;
