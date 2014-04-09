@@ -39,6 +39,10 @@ td {
     padding: 10px;
 }
 
+table tr:nth-child(even) td {
+    background-color: #eeeeee;
+}
+
 .thumbs {
     margin: 0 auto;
 }
@@ -62,6 +66,37 @@ td {
     text-align: center;
     border: 2px dashed #ccc;
     padding: 3px;
+    position: relative;
+}
+
+.dropPreview .close {
+    position: absolute;
+    top: -20px;
+    right: -15px;
+}
+
+.pointer {
+    cursor: pointer;
+}
+
+.sort {
+    cursor: move;
+}
+
+.over {
+    border-color: #3CB371;
+}
+
+.good {
+    color: #3CB371;
+}
+
+.close {
+    color: red;
+}
+
+.over td {
+    border-color: #3CB371;
 }
 
 #all {

@@ -19,12 +19,16 @@ app.controller("uploadeController", function ($scope, $imageUploade) {
         }
     });
     //После подгрузки картинки
-    $scope.$on('uplodeComplite', function (event, item, response) {
-        console.dir(response);
+    uploader.bind('uplodeComplite', function (event, item, response) {
+        //console.log(response);
     });
     //Перед началом загрузки
-    $scope.$on('beforeUplode', function (event, item) {
+    uploader.bind('beforeUplode', function (event, item) {
         //console.log(item);
+    });
+    //после сортировки
+    uploader.bind('afterSort', function (event, what, whereat, queue) {
+        //console.log(what);
     });
 });
 

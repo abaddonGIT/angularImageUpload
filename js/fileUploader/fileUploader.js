@@ -58,8 +58,8 @@ upLoader.factory('$imageUploade', ['html5', '$rootScope', 'errors', '$compile', 
             swfUploadOptions: {},
             allUploded: 0,
             queue: [],
-            errors: []
-
+            errors: [],
+            timestamp: Date.now()
         }, options);
 
         //Событие на добавление файлов
@@ -90,10 +90,57 @@ upLoader.factory('$imageUploade', ['html5', '$rootScope', 'errors', '$compile', 
             this.SWFinit(elem);
         }.bind(this));
 
+        //Сокртировка
+        this.scope.$on('sort:uplode', function (e, what, whereat) {
+            this.reSort(what, whereat);
+        }.bind(this));
+
         var that = this;
     };
 
     Loader.prototype = {
+        //Переставляет элементы местами в массиве
+        reSort: function (what, whereat) {
+            var ln = this.queue.length,
+                whatIndex = null,
+                whereatIndex = null,
+                newQueue = [], i = 0;
+
+            do {
+                var loc = this.queue[i];
+                if (loc.unicid === what) {
+                    whatIndex = i;
+                }
+
+                if (loc.unicid === whereat) {
+                    whereatIndex = i;
+                }
+                i++;
+            } while (i < ln);
+
+            i = 0;
+            do {
+                if (i === whatIndex) {
+                    newQueue[i] = this.queue[whereatIndex];
+                } else {
+                    if (i === whereatIndex) {
+                        newQueue[i] = this.queue[whatIndex];
+                    } else {
+                        newQueue.push(this.queue[i]);
+                    }
+                }
+                i++;
+            } while (i < ln);
+            this.queue = newQueue;
+            //после сортировки
+            this.trigger("afterSort", this.queue[whatIndex], this.queue[whereatIndex], this.queue);
+            this.updateScope();
+        },
+        //Делает уникальный маркер
+        generateQuickGuid: function () {
+            return Math.random().toString(36).substring(2, 15) +
+                Math.random().toString(36).substring(2, 15);
+        },
         //Добавляет файлы в очередь на загрузку
         addFilesToQueue: function (items) {
             var ln = items.length, i = 0,
@@ -119,12 +166,28 @@ upLoader.factory('$imageUploade', ['html5', '$rootScope', 'errors', '$compile', 
             //Обновляем наш скоп
             this.updateScope();
         },
+        /*
+         * Запускает "Грязную проверку", чтобы подцепить новые данные
+         */
         updateScope: function () {
             this.scope.$$phase || this.scope.$digest();
         },
-        comeEvent: function (event) {
+        /*
+         * Регистрирует события для конкретного вызова модуля
+         */
+        bind: function (event, handler) {
+            this.scope.$on(this.timestamp + ':' + event, handler.bind(this));
+        },
+        /*
+         * Вызывает событие
+         */
+        trigger: function (event, params) {
+            arguments[ 0 ] = this.timestamp + ':' + event;
             this.scope.$broadcast.apply(this.scope, arguments);
         },
+        /*
+         * Ф-я загрузки картинок
+         */
         loadedAll: function () {
             var ln = this.queue.length;
             var _load = function (i) {
@@ -160,7 +223,9 @@ upLoader.factory('$imageUploade', ['html5', '$rootScope', 'errors', '$compile', 
                 form = new FormData(),
                 that = this;
             item.xhr = xhr;
-            that.comeEvent('beforeUplode', item);
+            //Перед загрузкой
+            that.trigger('beforeUplode', item);
+
             form.append('Filedata', item.file);
             //Добавляем дополнительные параметры к запросу
             if (this.post_params) {
@@ -260,7 +325,6 @@ upLoader.factory('$imageUploade', ['html5', '$rootScope', 'errors', '$compile', 
                 this.swfUploadOptions.upload_success_handler = function (file, serverData) {
                     angular.forEach(that.queue, function (item) {
                         if (item.file.flash.index === file.index) {
-                            console.log(serverData);
                             item.afterUploade(serverData);
                         }
                     });
@@ -303,7 +367,6 @@ upLoader.factory('$imageUploade', ['html5', '$rootScope', 'errors', '$compile', 
                 options.transport = 'iframe';
                 break;
             case "flash":
-                console.dir(item);
                 options.file = {
                     lastModifiedDate: item.modificationdate,
                     name: item.name,
@@ -320,6 +383,7 @@ upLoader.factory('$imageUploade', ['html5', '$rootScope', 'errors', '$compile', 
             options.error = errors[100];
         }
         angular.extend(this, {
+            unicid: options.uplode.generateQuickGuid(),
             transport: 'html5',
             isUploaded: false,
             error: false,
@@ -335,7 +399,7 @@ upLoader.factory('$imageUploade', ['html5', '$rootScope', 'errors', '$compile', 
         afterUploade: function (response) {
             this.isUploaded = true;
             this.uplode.allUploded++;
-            this.uplode.comeEvent('uplodeComplite', this, response);
+            this.uplode.trigger('uplodeComplite', this, response);
             this.uplode.updateScope();
         },
         //Удаляет элемент из очереди

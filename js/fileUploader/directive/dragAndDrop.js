@@ -30,6 +30,8 @@ upLoader.directive("dropZone", ['$imageUploade' , 'html5', function ($imageUploa
 upLoader.directive("dragSort", ['$imageUploade' , 'html5', 'dropElement', function ($imageUploade, html5, dropElement) {
     return {
         link: function (scope, elem, attr) {
+            elem.prop('draggable', true);
+
             elem.bind('dragstart',function (e) {
                 var dataTransfer = dataTransfer = e.dataTransfer ? e.dataTransfer : e.originalEvent.dataTransfer;
                 //Сохраняем перетаскиваемый элемент
@@ -39,22 +41,24 @@ upLoader.directive("dragSort", ['$imageUploade' , 'html5', 'dropElement', functi
                 dataTransfer.effectAllowed = 'move';
                 //Сохраняем контент перетаскиваемого элемента
                 dataTransfer.setData('Text', this.innerHTML);
+            }).bind('selectstart', function (e) {
+                this.dragDrop();
+                e.preventDefault();
             }).bind('drop',function (e) {
                 var dataTransfer = dataTransfer = e.dataTransfer ? e.dataTransfer : e.originalEvent.dataTransfer;
 
                 if (dropElement) {
-                    dropElement.innerHTML = this.innerHTML;
-                    this.innerHTML = dataTransfer.getData('Text');
+                    scope.$emit('sort:uplode', this.id, dropElement.id);
                     dropElement.style.opacity = 1;
                     angular.element(this).removeClass('over');
                 } else {
                     return false;
                 }
+                //Останавливаем всплытие события
                 e.stopPropagation();
             }).bind("dragover",function (e) {
                 var dataTransfer = dataTransfer = e.dataTransfer ? e.dataTransfer : e.originalEvent.dataTransfer;
                 dataTransfer.dropEffect = "move";
-
                 angular.element(this).addClass('over');
                 e.preventDefault();
                 e.stopPropagation();

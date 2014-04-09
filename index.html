@@ -13,7 +13,8 @@
 <div id="wrapper">
     <div class="uplodes">
         <div data-drop-zone id="dropZone" ng-show="uploader.isHtml5">
-            <div ng-repeat="item in uploader.queue" class="dropPreview" data-drag-sort>
+            <div ng-repeat="item in uploader.queue" class="dropPreview sort" id="{{item.unicid}}" data-drag-sort>
+                <b ng-click="item.remove()" class="fa fa-times-circle fa-2x pointer close"></b>
                 <div ng-show="uploader.isHtml5" data-image-thumb="item.file" class="thumbs" data-width="100"></div>
                 {{item.file.name}}
             </div>
@@ -23,7 +24,7 @@
 
         <div class="uplode_list">
             <table>
-                <tr ng-repeat="item in uploader.queue">
+                <tr ng-repeat="item in uploader.queue" class="sort" id="{{item.unicid}}" data-drag-sort>
                     <td class="uplode-item">
                         <div ng-show="uploader.isHtml5" data-image-thumb="item.file" class="thumbs" data-width="100"></div>
                         {{item.file.name}}
@@ -38,7 +39,7 @@
                         <span class="{{item.isUploaded ? 'good fa fa-check fa-2x' : 'loading'}}"></span>
                     </td>
                     <td>
-                        <b ng-click="item.remove()" class="fa fa-times-circle fa-2x pointer"></b>
+                        <b ng-click="item.remove()" class="fa fa-times-circle fa-2x pointer close"></b>
                     </td>
                 </tr>
             </table>
