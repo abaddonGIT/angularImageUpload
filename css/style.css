@@ -59,6 +59,10 @@ table tr:nth-child(even) td {
     border-color: #3CB371;
 }
 
+fieldset {
+    margin-bottom: 20px;
+}
+
 .dropPreview {
     display: inline-block;
     vertical-align: top;

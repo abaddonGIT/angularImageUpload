@@ -17,11 +17,24 @@ upLoader.value('errors', {
 //Директива для элемента кагрузки
 upLoader.directive('uploadeSource', ['$imageUploade', 'html5', function ($imageUploade, html5) {
     return {
+        scope: {
+            settings: "=?",
+            result: "=?"
+        },
         restrict: 'A',
         link: function (scope, elem, attr) {
+            if (scope.settings) {
+                scope.settings.scope = scope;
+            } else {
+                scope.settings = {'scope': scope};
+            }
+            //Создание объекта загрузчика
+            $imageUploade.create(scope.settings);
             //Если есть поддержка html5
             if (html5) {
-                elem.prop("multiple", true);
+                if(scope.settings.multiple || scope.settings.multiple === undefined) {
+                    elem.prop("multiple", true);
+                }
             } else {
                 //Смотрим подключать ли flash-загрузкик или работать через iframe
                 if (attr.uploadeSource === 'flash') {
@@ -40,7 +53,7 @@ upLoader.directive('uploadeSource', ['$imageUploade', 'html5', function ($imageU
     };
 }]);
 
-upLoader.factory('$imageUploade', ['html5', '$rootScope', 'errors', '$compile', function (html5, $rootScope, errors, $compile) {
+upLoader.factory('$imageUploade', ['html5', '$rootScope', 'errors', '$compile', '$timeout', function (html5, $rootScope, errors, $compile, $timeout) {
     //Объект загрузчика
     var Loader = function (options) {
         if (!(this instanceof Loader)) {
@@ -50,7 +63,8 @@ upLoader.factory('$imageUploade', ['html5', '$rootScope', 'errors', '$compile', 
         //объединяем полученные настройки с дефолтовыми
         angular.extend(this, {
             isHtml5: html5,
-            scope: $rootScope,
+            root: $rootScope,
+            scope: null,
             multiple: true,
             acceptTypes: [],
             file_upload_limit: 0,
@@ -62,6 +76,7 @@ upLoader.factory('$imageUploade', ['html5', '$rootScope', 'errors', '$compile', 
             timestamp: Date.now()
         }, options);
 
+        this.scope.result = this;
         //Событие на добавление файлов
         this.scope.$on('add:uplode', function (e, data) {
             e.stopPropagation();
@@ -72,7 +87,6 @@ upLoader.factory('$imageUploade', ['html5', '$rootScope', 'errors', '$compile', 
             }
 
             var uplodeQueue = data.length ? data : [data];
-
             if (this.file_upload_limit === 0) {
                 this.addFilesToQueue(data);
             } else {
@@ -92,6 +106,7 @@ upLoader.factory('$imageUploade', ['html5', '$rootScope', 'errors', '$compile', 
 
         //Сокртировка
         this.scope.$on('sort:uplode', function (e, what, whereat) {
+            console.log('sort');
             this.reSort(what, whereat);
         }.bind(this));
 
@@ -132,6 +147,7 @@ upLoader.factory('$imageUploade', ['html5', '$rootScope', 'errors', '$compile', 
                 i++;
             } while (i < ln);
             this.queue = newQueue;
+            this.scope.result.queue = newQueue;
             //после сортировки
             this.trigger("afterSort", this.queue[whatIndex], this.queue[whereatIndex], this.queue);
             this.updateScope();
@@ -170,7 +186,7 @@ upLoader.factory('$imageUploade', ['html5', '$rootScope', 'errors', '$compile', 
          * Запускает "Грязную проверку", чтобы подцепить новые данные
          */
         updateScope: function () {
-            this.scope.$$phase || this.scope.$digest();
+            this.root.$$phase || this.root.$digest();
         },
         /*
          * Регистрирует события для конкретного вызова модуля
@@ -224,7 +240,7 @@ upLoader.factory('$imageUploade', ['html5', '$rootScope', 'errors', '$compile', 
                 that = this;
             item.xhr = xhr;
             //Перед загрузкой
-            that.trigger('beforeUplode', item);
+            that.trigger('beforeUplode', item, this);
 
             form.append('Filedata', item.file);
             //Добавляем дополнительные параметры к запросу
@@ -398,21 +414,27 @@ upLoader.factory('$imageUploade', ['html5', '$rootScope', 'errors', '$compile', 
     Item.prototype = {
         afterUploade: function (response) {
             this.isUploaded = true;
-            this.uplode.allUploded++;
-            this.uplode.trigger('uplodeComplite', this, response);
+            this.scope.result.allUploded++;
+            this.uplode.trigger('uplodeItemComplite', this, response);
             this.uplode.updateScope();
         },
         //Удаляет элемент из очереди
         remove: function () {
             var index = this.uplode.queue.indexOf(this);
             this.uplode.queue.splice(index, 1);
-            this.uplode.allUploded--;
+            this.uplode.trigger('uplodeItemRemove', this);
+            this.scope.result.allUploded--;
         }
     };
 
     return {
         create: function (options) {
             return Loader(options);
+        },
+        getInstance: function (scope, name, callback) {
+            $timeout(function () {
+                callback(scope[name]);
+            }, 0);
         }
     }
 }])

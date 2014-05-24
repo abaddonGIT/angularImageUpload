@@ -12,44 +12,87 @@
 
 <div id="wrapper">
     <div class="uplodes">
-        <div data-drop-zone id="dropZone" ng-show="uploader.isHtml5">
-            <div ng-repeat="item in uploader.queue" class="dropPreview sort" id="{{item.unicid}}" data-drag-sort>
-                <b ng-click="item.remove()" class="fa fa-times-circle fa-2x pointer close"></b>
-                <div ng-show="uploader.isHtml5" data-image-thumb="item.file" class="thumbs" data-width="100"></div>
-                {{item.file.name}}
-            </div>
-        </div>
-        <input type="file" data-uploade-source="flash"/>
-        <div id="all">{{uploader.allUploded}}</div>
+        <fieldset>
+            <legend>И кнопка для выбора файлов и связанное сним поле drag and drop</legend>
+            <div data-drop-zone result="uploader" id="dropZone" ng-show="uploader.isHtml5">
+                <div ng-repeat="item in uploader.queue" class="dropPreview sort" id="{{item.unicid}}"
+                     data-drag-sort="item">
+                    <b ng-click="item.remove()" class="fa fa-times-circle fa-2x pointer close"></b>
 
-        <div class="uplode_list">
-            <table>
-                <tr ng-repeat="item in uploader.queue" class="sort" id="{{item.unicid}}" data-drag-sort>
-                    <td class="uplode-item">
-                        <div ng-show="uploader.isHtml5" data-image-thumb="item.file" class="thumbs" data-width="100"></div>
-                        {{item.file.name}}
-                    </td>
-                    <td ng-show="item.file.size">{{item.mbSize}} мб.</td>
-                    <td ng-show="uploader.isHtml5">
-                        <div class="progress-bar">
-                            <span style="width: {{item.progress}}%"></span>
-                        </div>
-                    </td>
-                    <td>
-                        <span class="{{item.isUploaded ? 'good fa fa-check fa-2x' : 'loading'}}"></span>
-                    </td>
-                    <td>
-                        <b ng-click="item.remove()" class="fa fa-times-circle fa-2x pointer close"></b>
-                    </td>
-                </tr>
-            </table>
-        </div>
-        <div ng-repeat="error in uploader.errors track by $index">
-            {{error}}
-        </div>
-        <div ng-repeat="item in uploader.errorQueue">
-            {{item.file.name}} - {{item.error}}
-        </div>
+                    <div ng-show="uploader.isHtml5" data-image-thumb="item.file" class="thumbs" data-width="100"></div>
+                    {{item.file.name}}
+                </div>
+            </div>
+            <input type="file" data-uploade-source="flash" settings="uplode1" result="uploader"/>
+
+            <div id="all">{{uploader.allUploded}}</div>
+
+            <div class="uplode_list">
+                <table>
+                    <tr ng-repeat="item in uploader.queue" class="sort" id="{{item.unicid}}" data-drag-sort="item">
+                        <td class="uplode-item">
+                            <div ng-show="uploader.isHtml5" data-image-thumb="item.file" class="thumbs"
+                                 data-width="100"></div>
+                            {{item.file.name}}
+                        </td>
+                        <td ng-show="item.file.size">{{item.mbSize}} мб.</td>
+                        <td ng-show="uploader.isHtml5">
+                            <div class="progress-bar">
+                                <span style="width: {{item.progress}}%"></span>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="{{item.isUploaded ? 'good fa fa-check fa-2x' : 'loading'}}"></span>
+                        </td>
+                        <td>
+                            <b ng-click="item.remove()" class="fa fa-times-circle fa-2x pointer close"></b>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </fieldset>
+        <fieldset>
+            <legend>Самостоятельное поле drag and drop</legend>
+            <div data-drop-zone result="uploader3" settings="uplode3" id="dropZone" ng-show="uploader3.isHtml5">
+                <div ng-repeat="item in uploader3.queue" class="dropPreview sort" id="{{item.unicid}}"
+                     data-drag-sort="item">
+                    <b ng-click="item.remove()" class="fa fa-times-circle fa-2x pointer close"></b>
+
+                    <div ng-show="uploader3.isHtml5" data-image-thumb="item.file" class="thumbs" data-width="100"></div>
+                    {{item.file.name}}
+                </div>
+            </div>
+        </fieldset>
+        <fieldset>
+            <legend>Отдельное поле для загрузки файлов</legend>
+            <input type="file" data-uploade-source settings="uplode2" result="uploader1"/>
+
+            <div id="all">{{uploader1.allUploded}}</div>
+
+            <div class="uplode_list">
+                <table>
+                    <tr ng-repeat="item in uploader1.queue" class="sort" id="{{item.unicid}}" data-drag-sort="item">
+                        <td class="uplode-item">
+                            <div ng-show="uploader1.isHtml5" data-image-thumb="item.file" class="thumbs"
+                                 data-width="100"></div>
+                            {{item.file.name}}
+                        </td>
+                        <td ng-show="item.file.size">{{item.mbSize}} мб.</td>
+                        <td ng-show="uploader.isHtml5">
+                            <div class="progress-bar">
+                                <span style="width: {{item.progress}}%"></span>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="{{item.isUploaded ? 'good fa fa-check fa-2x' : 'loading'}}"></span>
+                        </td>
+                        <td>
+                            <b ng-click="item.remove()" class="fa fa-times-circle fa-2x pointer close"></b>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </fieldset>
     </div>
 </div>
 
