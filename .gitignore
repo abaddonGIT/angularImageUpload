@@ -7,3 +7,6 @@ uploads/
 .idea/vcs.xml
 .idea/workspace.xml
 .idea/www.iml
+js/fileUploader/directive/dragAndDrop.min.js
+js/fileUploader/directive/uploadeImageThumb.min.js
+js/main.min.js

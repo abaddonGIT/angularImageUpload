@@ -1,0 +1,19 @@
+<component name="libraryTable">
+  <library name="Generated files" type="javaScript">
+    <properties>
+      <sourceFilesUrls>
+        <item url="file://$PROJECT_DIR$/js/fileUploader/fileUploader.min.js" />
+        <item url="file://$PROJECT_DIR$/js/fileUploader/directive/uploadeImageThumb.min.js" />
+        <item url="file://$PROJECT_DIR$/js/fileUploader/directive/dragAndDrop.min.js" />
+        <item url="file://$PROJECT_DIR$/js/main.min.js" />
+      </sourceFilesUrls>
+    </properties>
+    <CLASSES>
+      <root url="file://$PROJECT_DIR$/js/fileUploader/fileUploader.min.js" />
+      <root url="file://$PROJECT_DIR$/js/fileUploader/directive/uploadeImageThumb.min.js" />
+      <root url="file://$PROJECT_DIR$/js/fileUploader/directive/dragAndDrop.min.js" />
+      <root url="file://$PROJECT_DIR$/js/main.min.js" />
+    </CLASSES>
+    <SOURCES />
+  </library>
+</component>
