@@ -13,6 +13,148 @@ upLoader.value('errors', {
     110: "При загрузке файла произошла ошибка!",
     120: "Привышен лимит на загрузку фалов!"
 });
+upLoader.value("dropElement", null);
+upLoader.directive('imageThumb', ['$imageUploade', 'html5', function ($imageUploade, html5) {
+    return {
+        link: function (scope, elem, attr) {
+            var file = scope.$eval(attr.imageThumb),
+                wantWidth = attr.width || 100,
+                wantHeight = attr.height || 100,
+                newWidth = 0, newHeight = 0;
+
+            elem[0].style.cssText += "width:" + wantWidth + "px; height: " + wantHeight + "px; overflow: hidden";
+
+            var getImage = function (url) {
+                var img = new Image(), width = 0, height = 0;
+                img.src = url;
+
+                img.onerror = function () {
+                    throw ("Не создать превью картинки!");
+                };
+
+                img.onload = function () {
+                    width = this.width;
+                    height = this.height;
+
+                    if (width < wantWidth && height < wantHeight) {
+                        newWidth = width;
+                        newHeight = height;
+                    }
+
+                    if (width / wantWidth > height / wantHeight) {
+                        newWidth = wantWidth;
+                        newHeight = Math.round(height * wantWidth / width);
+                    } else {
+                        newHeight = wantHeight;
+                        newWidth = Math.round(width * wantHeight / height);
+                    }
+                    img.width = newWidth;
+                    img.height = newHeight;
+
+                    elem.append(img);
+                }
+            };
+
+            if (html5) {
+                var reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onloadend = function (event) {
+                    var e = event;
+                    getImage(e.target.result);
+                }
+            }
+        }
+    };
+}]);
+upLoader.directive("dropZone", ['$imageUploade' , 'html5', '$timeout', function ($imageUploade, html5, $timeout) {
+    return {
+        scope: {
+            result: "=?",
+            settings: "=?"
+        },
+        link: function (scope, elem, attr) {
+            $timeout(function () {
+                if (scope.result) {//Если ссылка на уже существующий объек передана, то используем его
+                    scope = scope.result.scope;
+                } else {//Если нет то создаем новый загрузчик
+                    if (scope.settings) {
+                        scope.settings.scope = scope;
+                    } else {
+                        scope.settings = {'scope': scope};
+                    }
+                    //Создание объекта загрузчика
+                    $imageUploade.create(scope.settings);
+                }
+                elem.unbind("drop dragover dragleave");
+                elem.bind("drop",function (e) {
+                    var dataTransfer = e.dataTransfer ? e.dataTransfer : e.originalEvent.dataTransfer;
+                    scope.$emit("add:uplode", dataTransfer.files);
+                    elem.removeClass("active");
+                    e.stopPropagation();
+                    e.preventDefault();
+                }).bind("dragover",function (e) {
+                    var dataTransfer = e.dataTransfer ? e.dataTransfer : e.originalEvent.dataTransfer;
+                    elem.addClass("active");
+                    dataTransfer.dropEffect = 'copy';
+                    e.stopPropagation();
+                    e.preventDefault();
+                }).bind("dragleave", function (e) {
+                    elem.removeClass("active");
+                    e.stopPropagation();
+                    e.preventDefault();
+                });
+            }, 0);
+        }
+    };
+}]);
+
+upLoader.directive("dragSort", ['$imageUploade' , 'html5', 'dropElement', function ($imageUploade, html5, dropElement) {
+    return {
+        link: function (scope, elem, attr) {
+            var item = scope.$eval(attr.dragSort);
+            elem.prop('draggable', true);
+            elem.unbind("dragstart selectstart drop dragover dragleave dragend");
+            elem.bind('dragstart',function (e) {
+                var dataTransfer = dataTransfer = e.dataTransfer ? e.dataTransfer : e.originalEvent.dataTransfer;
+                //Сохраняем перетаскиваемый элемент
+                dropElement = this;
+                //Уменьшаем прозрачность элемента при перетаскивании
+                this.style.opacity = 0.4;
+                dataTransfer.effectAllowed = 'move';
+                //Сохраняем контент перетаскиваемого элемента
+                dataTransfer.setData('Text', this.innerHTML);
+            }).bind('selectstart',function (e) {
+                this.dragDrop();
+                e.preventDefault();
+            }).bind('drop',function (e) {
+                var dataTransfer = dataTransfer = e.dataTransfer ? e.dataTransfer : e.originalEvent.dataTransfer;
+
+                if (dropElement) {
+                    item.scope.$emit('sort:uplode', this.id, dropElement.id);
+                    dropElement.style.opacity = 1;
+                    angular.element(this).removeClass('over');
+                } else {
+                    return false;
+                }
+                //Останавливаем всплытие события
+                e.stopPropagation();
+            }).bind("dragover",function (e) {
+                var dataTransfer = dataTransfer = e.dataTransfer ? e.dataTransfer : e.originalEvent.dataTransfer;
+                dataTransfer.dropEffect = "move";
+                angular.element(this).addClass('over');
+                e.preventDefault();
+                e.stopPropagation();
+            }).bind("dragleave",function (e) {
+                angular.element(this).removeClass('over');
+                e.preventDefault();
+                e.stopPropagation();
+            }).bind('dragend', function (e) {
+                this.style.opacity = 1;
+                e.preventDefault();
+            });
+        }
+    };
+}]);
 
 //Директива для элемента кагрузки
 upLoader.directive('uploadeSource', ['$imageUploade', 'html5', function ($imageUploade, html5) {
@@ -23,37 +165,42 @@ upLoader.directive('uploadeSource', ['$imageUploade', 'html5', function ($imageU
         },
         restrict: 'A',
         link: function (scope, elem, attr) {
-            if (scope.settings) {
-                scope.settings.scope = scope;
-            } else {
-                scope.settings = {'scope': scope};
-            }
-            //Создание объекта загрузчика
-            $imageUploade.create(scope.settings);
-            //Если есть поддержка html5
-            if (html5) {
-                if(scope.settings.multiple || scope.settings.multiple === undefined) {
-                    elem.prop("multiple", true);
-                }
-            } else {
-                //Смотрим подключать ли flash-загрузкик или работать через iframe
-                if (attr.uploadeSource === 'flash') {
-                    //Скрываем стандартный input
-                    elem.css('display', 'none');
-                    scope.$emit('flash:uplode', elem);
-                }
-            }
+            scope.$watch("settings", function (value) {
+                if (value !== undefined) {
+                    if (scope.settings) {
+                        scope.settings.scope = scope;
+                    } else {
+                        scope.settings = {'scope': scope};
+                    }
+                    //Создание объекта загрузчика
+                    $imageUploade.create(scope.settings);
+                    //Если есть поддержка html5
+                    if (html5) {
+                        if (scope.settings.multiple || scope.settings.multiple === undefined) {
+                            elem.prop("multiple", true);
+                        }
+                    } else {
+                        //Смотрим подключать ли flash-загрузкик или работать через iframe
+                        if (attr.uploadeSource === 'flash') {
+                            //Скрываем стандартный input
+                            elem.css('display', 'none');
+                            scope.$emit('flash:uplode', elem);
+                        }
+                    }
 
-            //Запуск загрузчика
-            elem.bind('change', function () {
-                //В зависимости от поддержки передаем либо список файлов, либо сам елемент
-                scope.$emit('add:uplode', html5 ? this.files : this);
+                    //Запуск загрузчика
+                    elem.unbind("change");
+                    elem.bind('change', function () {
+                        //В зависимости от поддержки передаем либо список файлов, либо сам елемент
+                        scope.$emit('add:uplode', html5 ? this.files : this);
+                    });
+                }
             });
         }
     };
 }]);
 
-upLoader.factory('$imageUploade', ['html5', '$rootScope', 'errors', '$compile', '$timeout', function (html5, $rootScope, errors, $compile, $timeout) {
+upLoader.factory('$imageUploade', ['html5', '$rootScope', 'errors', '$compile', '$timeout', '$interval', function (html5, $rootScope, errors, $compile, $timeout, $interval) {
     //Объект загрузчика
     var Loader = function (options) {
         if (!(this instanceof Loader)) {
@@ -432,9 +579,13 @@ upLoader.factory('$imageUploade', ['html5', '$rootScope', 'errors', '$compile', 
             return Loader(options);
         },
         getInstance: function (scope, name, callback) {
-            $timeout(function () {
-                callback(scope[name]);
-            }, 0);
+            var timer = $interval(function () {
+                var instance = scope[name];
+                if (instance) {
+                    $interval.cancel(timer);
+                    callback(instance)
+                }
+            }, 100);
         }
     }
 }])
