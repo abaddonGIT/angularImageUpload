@@ -1,20 +1,24 @@
 /**
- * Created by netBeans.
- * User: abaddon
- * Date: 07.03.14
- * Time: 13:10
- * Description: Подгрузка файлов
- */
+* Created by netBeans.
+* User: abaddon
+* Date: 07.03.14
+* Time: 13:10
+* Description: Подгрузка файлов
+*/
 var upLoader = angular.module("imageUploade", []);
 //Поддердка HTML5
 upLoader.constant('html5', !!(window.File && window.FormData));
+//Кеширование картинок
+upLoader.factory("$imgCache", ["$cacheFactory", function ($cacheFactory) {
+    return $cacheFactory("imgCache");
+} ]);
 upLoader.value('errors', {
     100: "Не подходящий формат файла!",
     110: "При загрузке файла произошла ошибка!",
     120: "Привышен лимит на загрузку фалов!"
 });
 upLoader.value("dropElement", null);
-upLoader.directive('imageThumb', ['$imageUploade', 'html5', function ($imageUploade, html5) {
+upLoader.directive('imageThumb', ['$imgCache', 'html5', function ($imgCache, html5) {
     return {
         link: function (scope, elem, attr) {
             var file = scope.$eval(attr.imageThumb),
@@ -23,35 +27,41 @@ upLoader.directive('imageThumb', ['$imageUploade', 'html5', function ($imageUplo
                 newWidth = 0, newHeight = 0;
 
             elem[0].style.cssText += "width:" + wantWidth + "px; height: " + wantHeight + "px; overflow: hidden";
-
             var getImage = function (url) {
-                var img = new Image(), width = 0, height = 0;
-                img.src = url;
+                var img = $imgCache.get(url);
+                if (img) {
+                    elem.html('<img src="' + img.src + '" width="' + img.width + '" height="' + img.height + '" alt="" />');
+                } else {
+                    var width = 0, height = 0;
+                    img = new Image();
+                    img.onerror = function () {
+                        throw ("Не создать превью картинки!");
+                    };
 
-                img.onerror = function () {
-                    throw ("Не создать превью картинки!");
-                };
+                    img.onload = function () {
+                        width = this.width;
+                        height = this.height;
 
-                img.onload = function () {
-                    width = this.width;
-                    height = this.height;
+                        if (width < wantWidth && height < wantHeight) {
+                            newWidth = width;
+                            newHeight = height;
+                        }
 
-                    if (width < wantWidth && height < wantHeight) {
-                        newWidth = width;
-                        newHeight = height;
+                        if (width / wantWidth > height / wantHeight) {
+                            newWidth = wantWidth;
+                            newHeight = Math.round(height * wantWidth / width);
+                        } else {
+                            newHeight = wantHeight;
+                            newWidth = Math.round(width * wantHeight / height);
+                        }
+                        img.width = newWidth;
+                        img.height = newHeight;
+                        elem.append(img);
+                        //Помещаем картинку в кэш
+                        $imgCache.put(url, img);
                     }
-
-                    if (width / wantWidth > height / wantHeight) {
-                        newWidth = wantWidth;
-                        newHeight = Math.round(height * wantWidth / width);
-                    } else {
-                        newHeight = wantHeight;
-                        newWidth = Math.round(width * wantHeight / height);
-                    }
-                    img.width = newWidth;
-                    img.height = newHeight;
-
-                    elem.append(img);
+                    img.src = url;
+                    //Помещаем картинку в кэш
                 }
             };
 
@@ -60,13 +70,25 @@ upLoader.directive('imageThumb', ['$imageUploade', 'html5', function ($imageUplo
                 reader.readAsDataURL(file);
                 reader.onloadend = function (event) {
                     var e = event;
-                    getImage(e.target.result);
+                    if (file.ikon) {
+                        getImage(file.ikon);
+                    } else if (e.target.result) {
+                        getImage(e.target.result);
+                    } else {
+                        throw ("Не создать превью картинки!");
+                    }
+                }
+            } else {
+                if (file.ikon) {
+                    getImage(file.ikon);
+                } else {
+                    throw ("Не создать превью картинки!");
                 }
             }
         }
     };
-}]);
-upLoader.directive("dropZone", ['$imageUploade' , 'html5', '$timeout', function ($imageUploade, html5, $timeout) {
+} ]);
+upLoader.directive("dropZone", ['$imageUploade', 'html5', '$timeout', function ($imageUploade, html5, $timeout) {
     return {
         scope: {
             result: "=?",
@@ -80,19 +102,19 @@ upLoader.directive("dropZone", ['$imageUploade' , 'html5', '$timeout', function 
                     if (scope.settings) {
                         scope.settings.scope = scope;
                     } else {
-                        scope.settings = {'scope': scope};
+                        scope.settings = { 'scope': scope };
                     }
                     //Создание объекта загрузчика
                     $imageUploade.create(scope.settings);
                 }
                 elem.unbind("drop dragover dragleave");
-                elem.bind("drop",function (e) {
+                elem.bind("drop", function (e) {
                     var dataTransfer = e.dataTransfer ? e.dataTransfer : e.originalEvent.dataTransfer;
                     scope.$emit("add:uplode", dataTransfer.files);
                     elem.removeClass("active");
                     e.stopPropagation();
                     e.preventDefault();
-                }).bind("dragover",function (e) {
+                }).bind("dragover", function (e) {
                     var dataTransfer = e.dataTransfer ? e.dataTransfer : e.originalEvent.dataTransfer;
                     elem.addClass("active");
                     dataTransfer.dropEffect = 'copy';
@@ -106,15 +128,15 @@ upLoader.directive("dropZone", ['$imageUploade' , 'html5', '$timeout', function 
             }, 0);
         }
     };
-}]);
+} ]);
 
-upLoader.directive("dragSort", ['$imageUploade' , 'html5', 'dropElement', function ($imageUploade, html5, dropElement) {
+upLoader.directive("dragSort", ['$imageUploade', 'html5', 'dropElement', function ($imageUploade, html5, dropElement) {
     return {
         link: function (scope, elem, attr) {
             var item = scope.$eval(attr.dragSort);
             elem.prop('draggable', true);
             elem.unbind("dragstart selectstart drop dragover dragleave dragend");
-            elem.bind('dragstart',function (e) {
+            elem.bind('dragstart', function (e) {
                 var dataTransfer = dataTransfer = e.dataTransfer ? e.dataTransfer : e.originalEvent.dataTransfer;
                 //Сохраняем перетаскиваемый элемент
                 dropElement = this;
@@ -123,10 +145,10 @@ upLoader.directive("dragSort", ['$imageUploade' , 'html5', 'dropElement', functi
                 dataTransfer.effectAllowed = 'move';
                 //Сохраняем контент перетаскиваемого элемента
                 dataTransfer.setData('Text', this.innerHTML);
-            }).bind('selectstart',function (e) {
+            }).bind('selectstart', function (e) {
                 this.dragDrop();
                 e.preventDefault();
-            }).bind('drop',function (e) {
+            }).bind('drop', function (e) {
                 var dataTransfer = dataTransfer = e.dataTransfer ? e.dataTransfer : e.originalEvent.dataTransfer;
 
                 if (dropElement) {
@@ -138,13 +160,13 @@ upLoader.directive("dragSort", ['$imageUploade' , 'html5', 'dropElement', functi
                 }
                 //Останавливаем всплытие события
                 e.stopPropagation();
-            }).bind("dragover",function (e) {
+            }).bind("dragover", function (e) {
                 var dataTransfer = dataTransfer = e.dataTransfer ? e.dataTransfer : e.originalEvent.dataTransfer;
                 dataTransfer.dropEffect = "move";
                 angular.element(this).addClass('over');
                 e.preventDefault();
                 e.stopPropagation();
-            }).bind("dragleave",function (e) {
+            }).bind("dragleave", function (e) {
                 angular.element(this).removeClass('over');
                 e.preventDefault();
                 e.stopPropagation();
@@ -154,7 +176,7 @@ upLoader.directive("dragSort", ['$imageUploade' , 'html5', 'dropElement', functi
             });
         }
     };
-}]);
+} ]);
 
 //Директива для элемента кагрузки
 upLoader.directive('uploadeSource', ['$imageUploade', 'html5', function ($imageUploade, html5) {
@@ -170,7 +192,7 @@ upLoader.directive('uploadeSource', ['$imageUploade', 'html5', function ($imageU
                     if (scope.settings) {
                         scope.settings.scope = scope;
                     } else {
-                        scope.settings = {'scope': scope};
+                        scope.settings = { 'scope': scope };
                     }
                     //Создание объекта загрузчика
                     $imageUploade.create(scope.settings);
@@ -198,7 +220,7 @@ upLoader.directive('uploadeSource', ['$imageUploade', 'html5', function ($imageU
             });
         }
     };
-}]);
+} ]);
 
 upLoader.factory('$imageUploade', ['html5', '$rootScope', 'errors', '$compile', '$timeout', '$interval', function (html5, $rootScope, errors, $compile, $timeout, $interval) {
     //Объект загрузчика
@@ -217,6 +239,7 @@ upLoader.factory('$imageUploade', ['html5', '$rootScope', 'errors', '$compile', 
             file_upload_limit: 0,
             errorQueue: [],
             swfUploadOptions: {},
+            typeIkon: {},
             allUploded: 0,
             queue: [],
             errors: [],
@@ -244,18 +267,17 @@ upLoader.factory('$imageUploade', ['html5', '$rootScope', 'errors', '$compile', 
                     this.updateScope();
                 }
             }
-        }.bind(this));
+        } .bind(this));
 
         //Иницыализация flash-загрузчика
         this.scope.$on('flash:uplode', function (e, elem) {
             this.SWFinit(elem);
-        }.bind(this));
+        } .bind(this));
 
         //Сокртировка
         this.scope.$on('sort:uplode', function (e, what, whereat) {
-            console.log('sort');
             this.reSort(what, whereat);
-        }.bind(this));
+        } .bind(this));
 
         var that = this;
     };
@@ -308,12 +330,11 @@ upLoader.factory('$imageUploade', ['html5', '$rootScope', 'errors', '$compile', 
         addFilesToQueue: function (items) {
             var ln = items.length, i = 0,
                 uplodeQueue = ln ? items : [items];
-
-            do {
-                var item = new Item(uplodeQueue[i], {
+            while (ln--) {
+                var item = new Item(uplodeQueue[ln], {
                     uplode: this,
                     scope: this.scope,
-                    file: uplodeQueue[i]
+                    file: uplodeQueue[ln]
                 }, items.transport);
 
                 //Добавляем файл в очередь
@@ -322,35 +343,34 @@ upLoader.factory('$imageUploade', ['html5', '$rootScope', 'errors', '$compile', 
                 } else {
                     this.errorQueue.push(item);
                 }
-                i++;
-            } while (i < ln);
+            }
             //Подгружаем выбранные файлы
             this.loadedAll();
             //Обновляем наш скоп
             this.updateScope();
         },
         /*
-         * Запускает "Грязную проверку", чтобы подцепить новые данные
-         */
+        * Запускает "Грязную проверку", чтобы подцепить новые данные
+        */
         updateScope: function () {
             this.root.$$phase || this.root.$digest();
         },
         /*
-         * Регистрирует события для конкретного вызова модуля
-         */
+        * Регистрирует события для конкретного вызова модуля
+        */
         bind: function (event, handler) {
             this.scope.$on(this.timestamp + ':' + event, handler.bind(this));
         },
         /*
-         * Вызывает событие
-         */
+        * Вызывает событие
+        */
         trigger: function (event, params) {
-            arguments[ 0 ] = this.timestamp + ':' + event;
+            arguments[0] = this.timestamp + ':' + event;
             this.scope.$broadcast.apply(this.scope, arguments);
         },
         /*
-         * Ф-я загрузки картинок
-         */
+        * Ф-я загрузки картинок
+        */
         loadedAll: function () {
             var ln = this.queue.length;
             var _load = function (i) {
@@ -373,14 +393,14 @@ upLoader.factory('$imageUploade', ['html5', '$rootScope', 'errors', '$compile', 
                         _load(i);
                     }
                 }
-            }.bind(this);
+            } .bind(this);
 
             _load();
 
         },
         /*
-         * Загрузка по XHR
-         */
+        * Загрузка по XHR
+        */
         xhrUplode: function (item, callback) {
             var xhr = new XMLHttpRequest(),
                 form = new FormData(),
@@ -421,8 +441,8 @@ upLoader.factory('$imageUploade', ['html5', '$rootScope', 'errors', '$compile', 
             xhr.send(form);
         },
         /*
-         * Загрузка через iFrame
-         */
+        * Загрузка через iFrame
+        */
         iframeUplode: function (item) {
             var input = angular.element(item.file.input),
                 clone = $compile(input.clone())(this.scope),
@@ -457,8 +477,8 @@ upLoader.factory('$imageUploade', ['html5', '$rootScope', 'errors', '$compile', 
             });
         },
         /*
-         * Загрузка через SWFuplode
-         */
+        * Загрузка через SWFuplode
+        */
         SWFinit: function (elem) {
             var that = this;
             //Добавляем элемент в который будет помещена кнопка
@@ -512,10 +532,10 @@ upLoader.factory('$imageUploade', ['html5', '$rootScope', 'errors', '$compile', 
         }
     };
 
-//Объект Картинки
+    //Объект Картинки
     var Item = function (item, options, type) {
         switch (type) {
-            case "iframe"://подправляем объект изображения
+            case "iframe": //подправляем объект изображения
                 var value = item.value,
                     name = value.slice(value.lastIndexOf('\\') + 1),
                     type = value.slice(value.lastIndexOf('.') + 1).toLowerCase();
@@ -545,6 +565,8 @@ upLoader.factory('$imageUploade', ['html5', '$rootScope', 'errors', '$compile', 
         if (options.uplode.acceptTypes.indexOf(type) === -1 || !type) {
             options.error = errors[100];
         }
+        //Иконка для типов файла
+        options.file.ikon = options.uplode.typeIkon[type];
         angular.extend(this, {
             unicid: options.uplode.generateQuickGuid(),
             transport: 'html5',
@@ -588,5 +610,5 @@ upLoader.factory('$imageUploade', ['html5', '$rootScope', 'errors', '$compile', 
             }, 100);
         }
     }
-}])
+} ])
 ;
