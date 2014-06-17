@@ -31,7 +31,7 @@
                 <table>
                     <tr ng-repeat="item in uploader.queue" class="sort" id="{{item.unicid}}" data-drag-sort="item">
                         <td class="uplode-item">
-                            <div ng-show="uploader.isHtml5" data-image-thumb="item.file" class="thumbs"
+                            <div data-image-thumb="item.file" class="thumbs"
                                  data-width="100"></div>
                             {{item.file.name}}
                         </td>
@@ -74,7 +74,7 @@
                 <table>
                     <tr ng-repeat="item in uploader1.queue" class="sort" id="{{item.unicid}}" data-drag-sort="item">
                         <td class="uplode-item">
-                            <div ng-show="uploader1.isHtml5" data-image-thumb="item.file" class="thumbs"
+                            <div data-image-thumb="item.file" class="thumbs"
                                  data-width="100"></div>
                             {{item.file.name}}
                         </td>

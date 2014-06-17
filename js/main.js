@@ -3,8 +3,8 @@ var app = angular.module('app', ['imageUploade']);
 app.controller("uploadeController", function ($scope, $imageUploade, $timeout) {
     $scope.uplode1 = {
         url: "uploade.php",
-        acceptTypes: ['jpeg', 'jpg', 'png', 'gif', 'plain'],
-        typeIkon: {plain: 'uploads/Desert.jpg'},
+        acceptTypes: ['jpeg', 'jpg', 'png', 'gif', 'txt'],
+        typeIkon: {txt: 'uploads/Desert.jpg'},
         post_params: {test: 'lalka'},
         swfUploadOptions: {//Настройки для flash-загрузчика
             flash_url: "js/libs/swfupload/swfupload.swf",
@@ -22,8 +22,9 @@ app.controller("uploadeController", function ($scope, $imageUploade, $timeout) {
 
     $scope.uplode2 = {
         url: "uploade.php",
-        acceptTypes: ['jpeg', 'jpg', 'png', 'gif'],
+        acceptTypes: ['jpeg', 'jpg', 'png', 'gif', 'txt'],
         post_params: {test: 'lalka'},
+        typeIkon: {txt: 'uploads/Desert.jpg'},
         swfUploadOptions: {//Настройки для flash-загрузчика
             flash_url: "js/libs/swfupload/swfupload.swf",
             button_placeholder_id: "uploadButton",
