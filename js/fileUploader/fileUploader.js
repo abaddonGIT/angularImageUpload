@@ -471,7 +471,7 @@ upLoader.factory('$imageUploade', ['html5', '$rootScope', 'errors', '$compile', 
 
             //Отправляем форму
             form[0].submit();
-            //После загрузки фрайма
+            //После загрузки фрейма
             angular.element(iframe).bind('load', function () {
                 item.afterUploade(this.response);
                 //Удаляем форму

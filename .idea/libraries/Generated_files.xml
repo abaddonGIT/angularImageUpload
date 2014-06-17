@@ -2,21 +2,22 @@
   <library name="Generated files" type="javaScript">
     <properties>
       <sourceFilesUrls>
-        <item url="file://$PROJECT_DIR$/js/fileUploader/fileUploader.min.js" />
-        <item url="file://$PROJECT_DIR$/js/libs/swfupload/swfupload.min.js" />
-        <item url="file://$PROJECT_DIR$/js/fileUploader/directive/dragAndDrop.min.js" />
-        <item url="file://$PROJECT_DIR$/js/fileUploader/directive/uploadeImageThumb.min.js" />
-        <item url="file://$PROJECT_DIR$/js/main.min.js" />
+        <item url="file://$PROJECT_DIR$/js/fileUploader/fileUploader.min.min.min.js" />
         <item url="file://$PROJECT_DIR$/js/fileUploader/fileUploader.min.min.js" />
+        <item url="file://$PROJECT_DIR$/js/fileUploader/fileUploader.min.js" />
+        <item url="file://$PROJECT_DIR$/js/fileUploader/directive/uploadeImageThumb.min.js" />
+        <item url="file://$PROJECT_DIR$/js/fileUploader/directive/dragAndDrop.min.js" />
+        <item url="file://$PROJECT_DIR$/js/main.min.js" />
       </sourceFilesUrls>
     </properties>
     <CLASSES>
-      <root url="file://$PROJECT_DIR$/js/fileUploader/fileUploader.min.js" />
       <root url="file://$PROJECT_DIR$/js/libs/swfupload/swfupload.min.js" />
-      <root url="file://$PROJECT_DIR$/js/fileUploader/directive/dragAndDrop.min.js" />
-      <root url="file://$PROJECT_DIR$/js/fileUploader/directive/uploadeImageThumb.min.js" />
-      <root url="file://$PROJECT_DIR$/js/main.min.js" />
+      <root url="file://$PROJECT_DIR$/js/fileUploader/fileUploader.min.min.min.js" />
       <root url="file://$PROJECT_DIR$/js/fileUploader/fileUploader.min.min.js" />
+      <root url="file://$PROJECT_DIR$/js/fileUploader/fileUploader.min.js" />
+      <root url="file://$PROJECT_DIR$/js/fileUploader/directive/uploadeImageThumb.min.js" />
+      <root url="file://$PROJECT_DIR$/js/fileUploader/directive/dragAndDrop.min.js" />
+      <root url="file://$PROJECT_DIR$/js/main.min.js" />
     </CLASSES>
     <SOURCES />
   </library>
