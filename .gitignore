@@ -10,3 +10,4 @@ uploads/
 js/fileUploader/directive/dragAndDrop.min.js
 js/fileUploader/directive/uploadeImageThumb.min.js
 js/main.min.js
+js/libs/swfupload/swfupload.min.js
