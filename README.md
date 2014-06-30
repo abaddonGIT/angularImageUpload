@@ -130,3 +130,134 @@ $imageUploade.getInstance($scope, 'uploader2', function (uplode) {
 </pre>
     </li>
 </ol>
+<hr />
+angularImageUpload
+==================
+Upload multiple images and other files on angularess using HTML5. If your browser does not support HTML5, and then upload via iFrame or Flash (SFWuplode library).
+
+<h2>How to use it?</h2>
+<ol>
+    <li>
+        <h3>Installation:</h3>
+        <pre>var app = angular.module('app', ['imageUploade']);</pre>
+    </li>
+    <li>
+        <h3>Configuration:</h3>
+        <ul>
+            <li>
+                <b>In template:</b>
+                <pre>&lt;input type="file" data-uploade-source="flash" settings="uplode1" result="uploader1"/&gt;
+</pre>
+                This is field to select files, where <b>settings</b> - object for module configuration,
+                <b>result</b> - object to display the results.
+                If your browser does not support HTML5 and directive called as:
+<pre>
+    data-uploade-source="flash"
+</pre>
+                Then the files are loaded using Flash otherwise be used iFrame.
+                To download files, you can also use the area "Drag ang Drop":
+                <pre>
+&lt;div data-drop-zone result="uploader" id="dropZone" ng-show="uploader.isHtml5"&gt;
+    &lt;div ng-repeat="item in uploader.queue" class="dropPreview sort" id="{{item.unicid}}" data-drag-sort="item"&gt;
+        &lt;b ng-click="item.remove()" class="fa fa-times-circle fa-2x pointer close"&gt;&lt;/b&gt;
+        &lt;div ng-show="uploader.isHtml5" data-image-thumb="item.file" class="thumbs" data-width="100"&gt;&lt;/div&gt;
+        {{item.file.name}}
+    &lt;/div&gt;
+&lt;/div&gt;
+</pre>
+        They may be interdependent or be operated independently of each other.
+            </li>
+            <li>
+                <b>In controller:</b>
+                <pre>
+app.controller("uploadeController", ['$scope', '$imageUploade', function ($scope, $imageUploade) {
+    //Configuration to first uploder
+    $scope.uplode1 = {
+        url: "uploade.php",//Куда отправлять картинки на обработку
+        acceptTypes: ['jpeg', 'jpg', 'png', 'gif'],//Типы файлов разрешеные для загрузки
+        multiple: true,//Мультизагрузка файлов
+        post_params: {test: 'lalka'},//Параметры переданные сюда будут добавлены к запросу
+        swfUploadOptions: {//Настройки для flash-загрузчика
+            flash_url: "js/libs/swfupload/swfupload.swf",//Путь до газрузчика
+            button_placeholder_id: "uploadButton",//id контейнера для куда будет установлена кнопка
+            button_width: 100,
+            button_height: 30,
+            button_text_left_padding: 15,
+            button_text_top_padding: 2,
+            button_text: "<span class=\"uploadBtn\">Обзор...</span>",
+            button_text_style: ".uploadBtn { font-size: 18px; font-family: Arial; background-color: #FF0000; }"
+        }
+    };
+    //Configuration to second uploder
+    $scope.uplode2 = {
+        url: "uploade.php",
+        acceptTypes: ['jpeg', 'jpg', 'png', 'gif']
+    };
+}]);
+</pre>
+After initialization module, you cann use module events:
+    <pre>
+$imageUploade.getInstance($scope, 'uploader1', function (uplode) {
+    //Before uploading
+    uplode.bind('beforeUplode', function (event, item) {
+        uplode.post_params = {name: 'erick'};
+    });
+    //After sorting
+    uplode.bind('afterSort', function (event, what, whereat, queue) {
+        console.log(what);
+    });
+    //After uploading
+    uplode.bind('uplodeItemComplite', function (event, item, response) {
+        console.log(response);
+    });
+    //After remove
+    uplode.bind('uplodeItemRemove', function (event, item) {
+        console.log(item);
+    });
+});
+$imageUploade.getInstance($scope, 'uploader2', function (uplode) {
+    uplode.bind('beforeUplode', function (event, item) {
+        uplode.post_params = {name: 'erick'};
+    });
+});
+</pre>
+            </li>
+        </ul>
+    </li>
+    <li>
+        <h3>Template example:</h3>
+    <pre>
+&lt;div data-drop-zone result="uploader" id="dropZone" ng-show="uploader.isHtml5"&gt;
+    &lt;div ng-repeat="item in uploader.queue" class="dropPreview sort" id="{{item.unicid}}" data-drag-sort="item"&gt;
+        &lt;b ng-click="item.remove()" class="fa fa-times-circle fa-2x pointer close">&lt;/b&gt;
+        &lt;div ng-show="uploader.isHtml5" data-image-thumb="item.file" class="thumbs" data-width="100">&lt;/div>
+        {{item.file.name}}
+    &lt;/div&gt;
+&lt;/div&gt;
+&lt;input type="file" data-uploade-source="flash" settings="uplode1" result="uploader"/&gt;
+&lt;div id="all">{{uploader.allUploded}}&lt;/div&gt;
+&lt;div class="uplode_list"&gt;
+    &lt;table&gt;
+        &lt;tr ng-repeat="item in uploader.queue" class="sort" id="{{item.unicid}}" data-drag-sort="item"&gt;
+            &lt;td class="uplode-item"&gt;
+                &lt;div ng-show="uploader.isHtml5" data-image-thumb="item.file" class="thumbs" data-width="100">&lt;/div&gt;
+                    {{item.file.name}}
+            &lt;/td&gt;
+            &lt;td ng-show="item.file.size">{{item.mbSize}} мб.&lt;/td&gt;
+            &lt;td ng-show="uploader.isHtml5"&gt;
+                &lt;div class="progress-bar"&gt;
+                    &lt;span style="width: {{item.progress}}%">&lt;/span&gt;
+                &lt;/div&gt;
+            &lt;/td&gt;
+            &lt;td&gt;
+                &lt;span class="{{item.isUploaded ? 'good fa fa-check fa-2x' : 'loading'}}"&gt;&lt;/span&gt;
+            &lt;/td&gt;
+            &lt;td&gt;
+                &lt;b ng-click="item.remove()" class="fa fa-times-circle fa-2x pointer close"&gt;&lt;/b&gt;
+            &lt;/td&gt;
+        &lt;/tr&gt;
+    &lt;/table&gt;
+&lt;/div&gt;
+</pre>
+    </li>
+</ol>
