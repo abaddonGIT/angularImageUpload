@@ -17,10 +17,6 @@ upLoader.value('errors', {
     110: "При загрузке файла произошла ошибка!",
     120: "Привышен лимит на загрузку фалов!"
 });
-//Типы файлов
-upLoader.constant('$fileTypes', {
-
-});
 upLoader.value("dropElement", null);
 upLoader.directive('imageThumb', ['$imgCache', 'html5', function ($imgCache, html5) {
     return {
